@@ -1,0 +1,111 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  color-scheme: light;
+}
+
+html,
+body {
+  background-color: #faf7f2;
+  color: #1a1a1a;
+  font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+/* Prevent Mobile Safari auto-zoom on focus (iOS zooms inputs < 16px). */
+input,
+textarea,
+select,
+button {
+  font-size: 16px;
+}
+
+/* Tabular numerals so score columns line up. */
+.num {
+  font-variant-numeric: tabular-nums;
+}
+
+/* Visible keyboard focus ring. Overrides Tailwind's `outline-none` (used on
+   inline-editing inputs) when focus arrives via keyboard. §5.4 operability. */
+:focus-visible {
+  outline: 2px solid #1a1a1a;
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+/* Hide export-stripped sticky cell focus so the PNG doesn't capture it. */
+main[data-exporting="true"] :focus-visible {
+  outline: none;
+}
+
+/* Glass surface — §5.3. */
+.glass {
+  background: rgba(255, 255, 255, 0.55);
+  backdrop-filter: blur(20px) saturate(1.1);
+  -webkit-backdrop-filter: blur(20px) saturate(1.1);
+  border: 1px solid rgba(255, 255, 255, 0.6);
+  box-shadow:
+    0 8px 32px rgba(20, 15, 10, 0.08),
+    0 2px 8px rgba(20, 15, 10, 0.04);
+  border-radius: 24px;
+}
+
+/* Browsers without backdrop-filter (Firefox <103 default, some WebViews):
+   the 55%-opacity card has nothing obscuring the gradient behind it, which
+   tanks text legibility. Bump opacity so the card stays readable. */
+@supports not (backdrop-filter: blur(20px)) {
+  .glass {
+    background: rgba(255, 255, 255, 0.9);
+  }
+}
+
+/* Body backdrop — orange blob upper-right (the brand accent leaking through),
+   subtler warm gray lower-left for depth. */
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  background:
+    radial-gradient(
+      ellipse at 85% 15%,
+      rgba(249, 115, 22, 0.12) 0%,
+      transparent 55%
+    ),
+    radial-gradient(
+      ellipse at 15% 90%,
+      rgba(120, 100, 80, 0.06) 0%,
+      transparent 60%
+    );
+  z-index: -1;
+}
+
+/* PNG export hides editing UI (§4.11). Applied by MatrixPage via
+   data-exporting on <main>. html-to-image captures the DOM mid-render so
+   this rule takes effect for the duration of the snapshot. */
+main[data-exporting="true"] [data-export-hide] {
+  visibility: hidden !important;
+}
+main[data-exporting="true"] .export-hide-slider {
+  display: none !important;
+}
+/* Neutralize sticky option-name column during export so the PNG shows a flat
+   layout rather than the cell overlaying scrolled columns. §5.5 */
+main[data-exporting="true"] [data-sticky-col] {
+  position: static !important;
+  background: transparent !important;
+  border-right: none !important;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
