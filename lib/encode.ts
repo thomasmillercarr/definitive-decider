@@ -48,9 +48,18 @@ export type DecodeResult =
   | { ok: true; value: Matrix }
   | { ok: false; reason: string };
 
+// Reject oversized input before decompressing. The worst-case legitimate
+// payload is ~1241 chars (see the "URL length sanity" test); 8000 is generous
+// headroom while capping the decompression-amplification work an attacker could
+// force by hitting /api/og?m=<huge> directly on the edge runtime.
+const MAX_ENCODED_LEN = 8000;
+
 export function decode(encoded: string): DecodeResult {
   if (typeof encoded !== "string" || encoded.length === 0) {
     return { ok: false, reason: "empty input" };
+  }
+  if (encoded.length > MAX_ENCODED_LEN) {
+    return { ok: false, reason: "payload too large" };
   }
   let jsonStr: string | null = null;
   try {

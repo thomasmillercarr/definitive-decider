@@ -71,6 +71,14 @@ describe("decode — typed Result, never throws on bad input", () => {
     expect(r.ok).toBe(false);
   });
 
+  it("returns { ok:false } for an oversized payload without decompressing it", () => {
+    // 8001 chars — one past the MAX_ENCODED_LEN guard. Rejected on length alone,
+    // so no decompression work is done on this input.
+    const r = decode("a".repeat(8001));
+    expect(r.ok).toBe(false);
+    if (!r.ok) expect(r.reason).toBe("payload too large");
+  });
+
   it("returns { ok:false } when a score is out of range for the declared scale", () => {
     const payload = {
       t: "",
